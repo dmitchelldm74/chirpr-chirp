@@ -41,13 +41,17 @@ def at(text):
     return ret_text
 
 def link_image(text, link=True, image=True):
-    pat_url = re.compile(r'''(?x)((http|ftp|gopher|https)://(\w+[:.]?){2,}(/?|[^ \n\r"]+[\w/])(?=[\s\.,>)'"\]]))''')
+    text += ' ' if text[len(text)-1] != ' ' else ''
+    pat_url = re.compile(r'''(?x)((http|ftp|https)://(\w+[:.]?){2,}(/?|[^ \n\r"]+[\w/])(?=[\s\.,>)'"\]]))''')
+    history = []
     for url in re.findall(pat_url, text):
-        path = url[3].rsplit('.',1)
-        if image == True and len(path) > 1 and path[1] in ['png','jpg','jpeg','gif','ico']:
-            text = text.replace(url[0], template('image.html', url[0], url[0]))
-        elif link == True:
-            text = text.replace(url[0], template('link.html', url[0], url[0].split('://',1)[1]))
+        if url[0] not in history and len(url[2]) > 1:
+            path = url[3].rsplit('.',1)
+            if image == True and len(path) > 1 and path[1] in ['png','jpg','jpeg','gif','ico']:
+                text = text.replace(url[0], template('image.html', url[0], url[0]))
+            elif link == True:
+                text = text.replace(url[0], template('link.html', url[0], url[0].split('://',1)[1]))
+            history.append(url[0])
     return text
     
 def bio(text):
